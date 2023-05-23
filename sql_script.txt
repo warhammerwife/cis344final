@@ -1,0 +1,49 @@
+CREATE DATABASE banks_portal;
+USE banks_portal
+CREATE TABLE accounts(
+   accountId INT NOT NULL UNIQUE AUTO_INCREMENT,
+   ownerName VARCHAR(45) NOT NULL,
+   owner_ssn INT NOT NULL,
+   balance DECIMAL(10,2) DEFAULT 0.00,
+   account_status VARCHAR(45),
+   PRIMARY KEY (accountId));
+
+CREATE TABLE IF NOT EXISTS Transactions (
+   transactionId INT NOT NULL UNIQUE AUTO_INCREMENT,
+   accountId INT NOT NULL,
+   transactionType VARCHAR(45) NOT NULL,
+   transactionAmount DECIMAL(10,2) NOT NULL,
+   PRIMARY KEY (transactionId),
+   FOREIGN KEY (accountId) REFERENCES accounts(accountId)
+);
+
+INSERT INTO accounts (ownerName, owner_ssn, balance, account_status) VALUES("Maria Jozef", 123456789,10000.00, "active");
+INSERT INTO accounts (ownerName, owner_ssn, balance, account_status) VALUES("Linda Jones", 987654321, 2600.00, "inactive");
+INSERT INTO accounts (ownerName, owner_ssn, balance, account_status) VALUES("John McGrail", 222222222, 100.50, "active");
+INSERT INTO accounts (ownerName, owner_ssn, balance, account_status) VALUES("Patty Luna", 111111111,509.75, "inactive");
+
+
+INSERT INTO Transactions (accountId, transactionType, transactionAmount) VALUES(1, "deposit", 650.98);
+INSERT INTO Transactions (accountId, transactionType, transactionAmount) VALUES(3, "withdraw", 899.87);
+INSERT INTO Transactions (accountId, transactionType, transactionAmount) VALUES(3, "deposit",350.00);
+
+DELIMITER &&  
+CREATE PROCEDURE accountTransactions(IN accountID INT) 
+BEGIN  
+    SELECT * FROM transactions WHERE transactions.accountId = accountID;
+END &&  
+
+DELIMITER &&  
+CREATE PROCEDURE deposit(IN accountID INT,amount DECIMAL(10,2))
+BEGIN  
+    INSERT INTO Transactions(accountId, transactionType, transactionAmount) VALUES(accountID, "deposit", amount);
+    UPDATE accounts SET balance = balance + amount WHERE accounts.accountId = accountID;
+END &&  
+
+DELIMITER &&  
+CREATE PROCEDURE withdraw(IN accountID INT,amount DECIMAL(10,2))
+BEGIN  
+    INSERT INTO Transactions(accountId, transactionType, transactionAmount) VALUES(accountID, "withdraw", amount);
+    UPDATE accounts SET balance = balance - amount WHERE accounts.accountId = accountID;
+END &&  
+
